@@ -20,6 +20,10 @@ export default class SceneInit {
     this.stats = undefined;
     this.controls = undefined;
 
+    //for raycasting
+    this.raycaster = undefined;
+    this.pointer = undefined;
+
     // NOTE: Lighting is basically required.
     this.ambientLight = undefined;
     this.directionalLight = undefined;
@@ -62,6 +66,11 @@ export default class SceneInit {
     this.directionalLight.position.set(0, 32, 64);
     this.scene.add(this.directionalLight);
 
+    //raycasting
+    this.raycaster = new THREE.Raycaster();
+    this.pointer = new THREE.Vector2();
+    window.addEventListener( 'click', (e) => this.onPointerClick(e));
+
     // if window resizes
     window.addEventListener('resize', () => this.onWindowResize(), false);
 
@@ -75,6 +84,22 @@ export default class SceneInit {
     //   colorB: { type: 'vec3', value: new THREE.Color(0xfff000) },
     //   colorA: { type: 'vec3', value: new THREE.Color(0xffffff) },
     // };
+  }
+
+  onPointerClick( event ) {
+    // calculate pointer position in normalized device coordinates
+    // (-1 to +1) for both components
+    this.pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+    this.pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+    // raycasting
+    // update the picking ray with the camera and pointer position
+    this.raycaster.setFromCamera( this.pointer, this.camera );
+    // calculate objects intersecting the picking ray
+    const intersects = this.raycaster.intersectObjects( this.scene.children );
+    for ( let i = 0; i < intersects.length; i ++ ) {
+      intersects[i].object.material.color.set( 0xff0000 );
+      console.log(intersects[i].object.name);//#TODO del
+    }
   }
 
   animate() {
